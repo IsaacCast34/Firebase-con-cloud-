@@ -1,6 +1,9 @@
 package com.example.firebasecloudmessenging
 
 import android.Manifest
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -66,33 +69,18 @@ class MainActivity : AppCompatActivity() {
             if (task.isSuccessful) {
                 val token = task.result
                 tvToken.text = token
-                println("✅ FCM Token: $token")
+                println("FCM Token: $token")
             } else {
                 tvToken.text = "Error obteniendo token"
-                println("❌ Error FCM: ${task.exception?.message}")
+                println("Error FCM: ${task.exception?.message}")
             }
         }
     }
 
     private fun copyToClipboard(text: String) {
-        val clipboard = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-        val clip = android.content.ClipData.newPlainText("FCM Token", text)
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("FCM Token", text)
         clipboard.setPrimaryClip(clip)
         Toast.makeText(this, "Token copiado al portapapeles", Toast.LENGTH_SHORT).show()
-    }
-}
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FirebaseCloudMessengingTheme {
-        Greeting("Android")
     }
 }
