@@ -3,8 +3,10 @@ package com.example.firebasecloudmessenging
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -16,18 +18,31 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        remoteMessage.notification?.let {
-            showNotification(it.title ?: "Nueva notificación", it.body ?: "")
-        }
+        var title: String
+        var body: String
 
-        remoteMessage.data.let { data ->
-            if (data.isNotEmpty()) {
-                showNotification(
-                    data["title"] ?: "Mensaje de datos",
-                    data["body"] ?: "Contenido del mensaje"
-                )
+        remoteMessage.notification?.let {
+            title = it.title ?: "Nueva notificación"
+            body = it.body ?: ""
+            showNotification(title, body)
+        } ?: run {
+            remoteMessage.data.let { data ->
+                if (data.isNotEmpty()) {
+                    title = data["title"] ?: "Mensaje de datos"
+                    body = data["body"] ?: "Contenido del mensaje"
+                    showNotification(title, body)
+                } else {
+                    return
+                }
             }
         }
+
+        // Enviar broadcast a la actividad para actualizar UI
+        val intent = Intent("com.example.firebasecloudmessenging.NEW_MESSAGE").apply {
+            putExtra("title", title)
+            putExtra("body", body)
+        }
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
     }
 
     override fun onNewToken(token: String) {
