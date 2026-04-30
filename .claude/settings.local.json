@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node server.js)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(mkdir -p app/src/main/res/mipmap-anydpi-v26)",
+      "Bash(mv app/src/main/res/mipmap-anydpi/ic_launcher.xml app/src/main/res/mipmap-anydpi-v26/)",
+      "Bash(mv app/src/main/res/mipmap-anydpi/ic_launcher_round.xml app/src/main/res/mipmap-anydpi-v26/)",
+      "Bash(rmdir app/src/main/res/mipmap-anydpi)",
+      "Bash(./gradlew assembleDebug --info)",
+      "Bash(./gradlew compileDebugKotlin *)"
+    ]
+  }
+}

@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 // Inicializar Firebase Admin SDK
 // Descarga tu serviceAccountKey.json de Firebase Console > Configuración del proyecto > Cuentas de servicio
 // Colócalo en la misma carpeta que este archivo
-const serviceAccount = require('./serviceAccountKey.json');
+const serviceAccount = require('./movil-con-messenging-firebase-adminsdk-fbsvc-c8d4f2add2.json');
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)

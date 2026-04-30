@@ -1,12 +1,9 @@
 package com.example.firebasecloudmessenging
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -16,7 +13,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : AppCompatActivity() {
@@ -35,14 +31,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private val messageReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            val title = intent?.getStringExtra("title") ?: "Mensaje"
-            val body = intent?.getStringExtra("body") ?: ""
-            tvMessage.text = "$title: $body"
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         btnCopyToken = findViewById(R.id.btnCopyToken)
         tvMessage = findViewById(R.id.tvMessage)
 
+        val prefs = getSharedPreferences("fcm_prefs", Context.MODE_PRIVATE)
+        tvMessage.text = prefs.getString("last_message", "No hay mensajes")
+
         btnCopyToken.setOnClickListener {
             val token = tvToken.text.toString()
             if (token.isNotEmpty() && token != "Cargando token...") {
@@ -58,15 +49,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        checkAndRequestNotificationPermission()
+        MyFirebaseMessagingService.onMessageReceived = { title, body ->
+            val mensaje = "$title: $body"
+            prefs.edit().putString("last_message", mensaje).apply()
+            runOnUiThread { tvMessage.text = mensaje }
+        }
 
-        // Registrar el receiver para mensajes
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, IntentFilter("com.example.firebasecloudmessenging.NEW_MESSAGE"))
+        checkAndRequestNotificationPermission()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(messageReceiver)
+        MyFirebaseMessagingService.onMessageReceived = null
     }
 
     private fun checkAndRequestNotificationPermission() {
@@ -74,12 +68,8 @@ class MainActivity : AppCompatActivity() {
             when {
                 ContextCompat.checkSelfPermission(
                     this, Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED -> {
-                    getFCMToken()
-                }
-                else -> {
-                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
+                ) == PackageManager.PERMISSION_GRANTED -> getFCMToken()
+                else -> requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         } else {
             getFCMToken()

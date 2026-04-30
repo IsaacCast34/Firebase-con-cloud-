@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "354107347656",
+    "project_id": "movil-con-messenging",
+    "storage_bucket": "movil-con-messenging.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354107347656:android:a897adea1291439b778bfd",
+        "android_client_info": {
+          "package_name": "com.example.firebasecloudmessenging"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDgVARB1w04uwgFMCMmhhxEfSRh01uINqw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

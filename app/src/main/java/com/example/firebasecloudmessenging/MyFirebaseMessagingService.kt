@@ -3,10 +3,8 @@ package com.example.firebasecloudmessenging
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
@@ -15,34 +13,28 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     private val CHANNEL_ID = "fcm_demo_channel"
     private val NOTIFICATION_ID = 1001
 
+    companion object {
+        var onMessageReceived: ((title: String, body: String) -> Unit)? = null
+    }
+
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        var title: String
-        var body: String
+        val title: String
+        val body: String
 
-        remoteMessage.notification?.let {
-            title = it.title ?: "Nueva notificación"
-            body = it.body ?: ""
-            showNotification(title, body)
-        } ?: run {
-            remoteMessage.data.let { data ->
-                if (data.isNotEmpty()) {
-                    title = data["title"] ?: "Mensaje de datos"
-                    body = data["body"] ?: "Contenido del mensaje"
-                    showNotification(title, body)
-                } else {
-                    return
-                }
-            }
+        if (remoteMessage.notification != null) {
+            title = remoteMessage.notification!!.title ?: "Nueva notificación"
+            body = remoteMessage.notification!!.body ?: ""
+        } else if (remoteMessage.data.isNotEmpty()) {
+            title = remoteMessage.data["title"] ?: "Mensaje de datos"
+            body = remoteMessage.data["body"] ?: "Contenido del mensaje"
+        } else {
+            return
         }
 
-        // Enviar broadcast a la actividad para actualizar UI
-        val intent = Intent("com.example.firebasecloudmessenging.NEW_MESSAGE").apply {
-            putExtra("title", title)
-            putExtra("body", body)
-        }
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        showNotification(title, body)
+        onMessageReceived?.invoke(title, body)
     }
 
     override fun onNewToken(token: String) {
